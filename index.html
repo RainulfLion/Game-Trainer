@@ -1,1 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Token Map</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #333;
+            cursor: grab;
+            display: block;
+            margin: 0 auto;
+            background: #e8f4f8;
+        }
+        
+        #gameCanvas:active {
+            cursor: grabbing;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        .info {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Interactive Token Map</h1>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div class="controls">
+            <button onclick="addToken()">Add Token</button>
+            <button onclick="clearTokens()">Clear All</button>
+            <div class="info">
+                <p>🎯 Drag tokens around the map • Right-click to remove tokens</p>
+                <p id="tokenCount">Tokens: 0</p>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game state
+        let tokens = [];
+        let draggedToken = null;
+        let dragOffset = { x: 0, y: 0 };
+        let mousePos = { x: 0, y: 0 };
+        
+        // Token colors
+        const tokenColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FFA07A', '#98D8C8'];
+        
+        // Token class
+        class Token {
+            constructor(x, y, color, id) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.radius = 20;
+                this.id = id;
+                this.label = `T${id}`;
+            }
+            
+            draw() {
+                // Shadow
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 5;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                
+                // Token body
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Reset shadow
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                
+                // Token label
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.label, this.x, this.y);
+            }
+            
+            contains(x, y) {
+                const dx = x - this.x;
+                const dy = y - this.y;
+                return dx * dx + dy * dy <= this.radius * this.radius;
+            }
+        }
+        
+        // Draw the map background
+        function drawMap() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            
+            for (let x = 0; x <= canvas.width; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= canvas.height; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw some map features (optional decorations)
+            drawMapFeatures();
+        }
+        
+        function drawMapFeatures() {
+            // Draw some simple terrain features
+            ctx.fillStyle = '#90EE90';
+            ctx.fillRect(100, 100, 150, 80); // Forest
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(120, 120, 110, 40); // Mountain
+            
+            ctx.fillStyle = '#87CEEB';
+            ctx.beginPath();
+            ctx.arc(600, 300, 60, 0, Math.PI * 2); // Lake
+            ctx.fill();
+            
+            // Labels for features
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Forest', 175, 190);
+            ctx.fillText('Lake', 600, 380);
+        }
+        
+        // Get mouse position relative to canvas
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+        
+        // Find token at position
+        function getTokenAt(x, y) {
+            for (let i = tokens.length - 1; i >= 0; i--) {
+                if (tokens[i].contains(x, y)) {
+                    return tokens[i];
+                }
+            }
+            return null;
+        }
+        
+        // Add a new token
+        function addToken() {
+            const x = Math.random() * (canvas.width - 40) + 20;
+            const y = Math.random() * (canvas.height - 40) + 20;
+            const color = tokenColors[tokens.length % tokenColors.length];
+            const token = new Token(x, y, color, tokens.length + 1);
+            tokens.push(token);
+            updateTokenCount();
+            render();
+        }
+        
+        // Clear all tokens
+        function clearTokens() {
+            tokens = [];
+            draggedToken = null;
+            updateTokenCount();
+            render();
+        }
+        
+        // Update token counter
+        function updateTokenCount() {
+            document.getElementById('tokenCount').textContent = `Tokens: ${tokens.length}`;
+        }
+        
+        // Render everything
+        function render() {
+            drawMap();
+            tokens.forEach(token => token.draw());
+        }
+        
+        // Mouse event handlers
+        canvas.addEventListener('mousedown', (e) => {
+            mousePos = getMousePos(e);
+            const token = getTokenAt(mousePos.x, mousePos.y);
+            
+            if (token) {
+                draggedToken = token;
+                dragOffset = {
+                    x: mousePos.x - token.x,
+                    y: mousePos.y - token.y
+                };
+                canvas.style.cursor = 'grabbing';
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            mousePos = getMousePos(e);
+            
+            if (draggedToken) {
+                // Update token position
+                draggedToken.x = mousePos.x - dragOffset.x;
+                draggedToken.y = mousePos.y - dragOffset.y;
+                
+                // Keep token within bounds
+                draggedToken.x = Math.max(draggedToken.radius, Math.min(canvas.width - draggedToken.radius, draggedToken.x));
+                draggedToken.y = Math.max(draggedToken.radius, Math.min(canvas.height - draggedToken.radius, draggedToken.y));
+                
+                render();
+            } else {
+                // Change cursor based on whether hovering over token
+                const token = getTokenAt(mousePos.x, mousePos.y);
+                canvas.style.cursor = token ? 'grab' : 'default';
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            draggedToken = null;
+            canvas.style.cursor = 'default';
+        });
+        
+        // Right-click to remove token
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            mousePos = getMousePos(e);
+            const token = getTokenAt(mousePos.x, mousePos.y);
+            
+            if (token) {
+                const index = tokens.indexOf(token);
+                tokens.splice(index, 1);
+                updateTokenCount();
+                render();
+            }
+        });
+        
+        // Handle mouse leave
+        canvas.addEventListener('mouseleave', () => {
+            draggedToken = null;
+            canvas.style.cursor = 'default';
+        });
+        
+        // Initialize with a few tokens
+        addToken();
+        addToken();
+        addToken();
+        
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
