@@ -3,52 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Token Map</title>
+    <title>Warhammer: The Old World Simulator</title>
     <style>
         body {
-            margin: 0;
-            padding: 20px;
             font-family: Arial, sans-serif;
-            background: #f0f0f0;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 20px;
-        }
-        
-        .main-game {
-            flex: 1;
-        }
-        
-        .sidebar {
-            width: 220px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            border: 2px solid #e9ecef;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        
-        .sidebar h3 {
-            margin: 0 0 15px 0;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
             color: #333;
-            font-size: 16px;
         }
-        
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            height: calc(100vh - 40px);
+        }
+        .sidebar h2, .sidebar h3 {
+            margin-top: 0;
+            color: white;
+        }
         .token-types {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            margin-top: 20px;
         }
-        
+        details {
+            margin-bottom: 10px;
+        }
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px;
+            background: #34495e;
+            border-radius: 5px;
+        }
+        summary:hover {
+            background: #3d566e;
+        }
         .token-type {
             display: flex;
             align-items: center;
@@ -58,19 +59,18 @@
             border-radius: 5px;
             cursor: pointer;
             background: white;
+            color: #333;
             transition: all 0.2s;
+            margin: 4px 0;
         }
-        
         .token-type:hover {
             border-color: #4CAF50;
             background: #f0f8f0;
         }
-        
         .token-type.selected {
             border-color: #4CAF50;
             background: #e8f5e8;
         }
-        
         .token-preview {
             width: 30px;
             height: 30px;
@@ -81,25 +81,21 @@
             font-size: 14px;
             border: 2px solid #333;
         }
-        
         .token-label {
             font-size: 12px;
             font-weight: bold;
         }
-        
-        .dice-section {
+        .dice-section, .formation-section, .template-section {
             margin-top: 25px;
             padding-top: 15px;
             border-top: 2px solid #e9ecef;
         }
-        
         .dice-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
             margin: 10px 0;
         }
-        
         .dice-control {
             display: flex;
             align-items: center;
@@ -107,15 +103,14 @@
             border: 2px solid #ddd;
             border-radius: 4px;
             padding: 5px;
+            color: #333;
         }
-        
         .dice-label {
             font-size: 11px;
             font-weight: bold;
             margin-right: 5px;
             min-width: 25px;
         }
-        
         .dice-input {
             width: 30px;
             border: none;
@@ -123,12 +118,10 @@
             font-size: 12px;
             background: transparent;
         }
-        
         .dice-input:focus {
             outline: none;
             background: #f0f8f0;
         }
-        
         .roll-button {
             background: #FF6B35;
             color: white;
@@ -140,11 +133,9 @@
             width: 100%;
             margin: 8px 0;
         }
-        
         .roll-button:hover {
             background: #E55A2B;
         }
-        
         .dice-results {
             background: white;
             border: 2px solid #ddd;
@@ -153,29 +144,26 @@
             margin: 8px 0;
             min-height: 60px;
             font-size: 12px;
+            color: #333;
         }
-        
         .roll-total {
             font-weight: bold;
             font-size: 16px;
             color: #FF6B35;
             margin: 5px 0;
         }
-        
         .roll-details {
             color: #666;
             font-size: 11px;
             line-height: 1.3;
         }
-        
-        .preset-rolls {
+        .preset-rolls, .special-dice {
             display: flex;
             flex-direction: column;
             gap: 4px;
             margin: 8px 0;
         }
-        
-        .preset-button {
+        .preset-button, .special-dice-button {
             background: #6C63FF;
             color: white;
             border: none;
@@ -185,17 +173,94 @@
             font-size: 10px;
             font-weight: bold;
         }
-        
-        .preset-button:hover {
+        .preset-button:hover, .special-dice-button:hover {
             background: #5A52E8;
         }
-        
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
+        .formation-controls, .template-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
-        
+        .formation-button, .template-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .formation-button:hover, .template-button:hover {
+            background: #218838;
+        }
+        .formation-button.active, .template-button.active {
+            background: #ff6b35;
+        }
+        .formation-button.active:hover, .template-button.active:hover {
+            background: #e55a2b;
+        }
+        .tray-list {
+            margin: 8px 0;
+            font-size: 11px;
+            color: #333;
+        }
+        .tray-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 4px 6px;
+            margin: 2px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .tray-item.selected {
+            border-color: #28a745;
+            background: #f0f8f0;
+        }
+        .tray-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            padding: 2px 5px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+        .rules-area {
+            flex: 0 1 auto;
+        }
+        .map-area {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .main-content h1 {
+            margin-top: 0;
+            text-align: center;
+        }
+        .rules-summary {
+            line-height: 1.6;
+        }
+        .rules-summary ul {
+            padding-left: 20px;
+        }
+        .citation {
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 10px;
+        }
         #gameCanvas {
             border: 2px solid #333;
             cursor: grab;
@@ -203,17 +268,14 @@
             margin: 0 auto;
             background: #e8f4f8;
         }
-        
         #gameCanvas:active {
             cursor: grabbing;
         }
-        
         .controls {
             text-align: center;
             margin-top: 15px;
             color: #666;
         }
-        
         button {
             background: #4CAF50;
             color: white;
@@ -224,21 +286,32 @@
             cursor: pointer;
             font-size: 14px;
         }
-        
         button:hover {
             background: #45a049;
         }
-        
         .info {
             margin-top: 10px;
             font-size: 14px;
+        }
+        #tooltip {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            pointer-events: none;
+            display: none;
+            z-index: 1000;
+            font-size: 12px;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="sidebar">
-            <h3>🎮 Token Types</h3>
+            <h2>Warhammer: The Old World</h2>
+            
             <div class="token-types" id="tokenTypes">
                 <!-- Token types will be populated by JavaScript -->
             </div>
@@ -248,32 +321,8 @@
                 
                 <div class="dice-grid">
                     <div class="dice-control">
-                        <span class="dice-label">d4:</span>
-                        <input type="number" class="dice-input" id="d4" min="0" max="20" value="0">
-                    </div>
-                    <div class="dice-control">
                         <span class="dice-label">d6:</span>
                         <input type="number" class="dice-input" id="d6" min="0" max="20" value="0">
-                    </div>
-                    <div class="dice-control">
-                        <span class="dice-label">d8:</span>
-                        <input type="number" class="dice-input" id="d8" min="0" max="20" value="0">
-                    </div>
-                    <div class="dice-control">
-                        <span class="dice-label">d10:</span>
-                        <input type="number" class="dice-input" id="d10" min="0" max="20" value="0">
-                    </div>
-                    <div class="dice-control">
-                        <span class="dice-label">d12:</span>
-                        <input type="number" class="dice-input" id="d12" min="0" max="20" value="0">
-                    </div>
-                    <div class="dice-control">
-                        <span class="dice-label">d20:</span>
-                        <input type="number" class="dice-input" id="d20" min="0" max="20" value="1">
-                    </div>
-                    <div class="dice-control">
-                        <span class="dice-label">d100:</span>
-                        <input type="number" class="dice-input" id="d100" min="0" max="10" value="0">
                     </div>
                     <div class="dice-control">
                         <span class="dice-label">Mod:</span>
@@ -283,11 +332,9 @@
                 
                 <button class="roll-button" onclick="rollDice()">🎲 ROLL!</button>
                 
-                <div class="preset-rolls">
-                    <button class="preset-button" onclick="setDicePreset('attack')">⚔️ Attack (d20+mod)</button>
-                    <button class="preset-button" onclick="setDicePreset('damage')">💥 Damage (d8+mod)</button>
-                    <button class="preset-button" onclick="setDicePreset('stats')">📊 Stats (4d6)</button>
-                    <button class="preset-button" onclick="setDicePreset('initiative')">🏃 Initiative (d20+mod)</button>
+                <div class="special-dice">
+                    <button class="special-dice-button" onclick="rollArtillery()">🔥 Artillery Dice</button>
+                    <button class="special-dice-button" onclick="rollScatter()">➡️ Scatter Dice</button>
                 </div>
                 
                 <div class="dice-results" id="diceResults">
@@ -296,45 +343,313 @@
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="main-game">
-            <h1>🗺️ Interactive Token Map</h1>
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
             
-            <div class="controls">
-                <button onclick="addToken()">Add Token</button>
-                <button onclick="clearTokens()">Clear All</button>
-                <div class="info">
-                    <p>🎯 Select token type from sidebar • Drag tokens around • Right-click to remove</p>
-                    <p id="tokenCount">Tokens: 0</p>
+            <div class="template-section">
+                <h3>🛡️ Templates</h3>
+                
+                <div class="template-controls">
+                    <button class="template-button" onclick="addTemplate('small_blast')">Small Blast (3")</button>
+                    <button class="template-button" onclick="addTemplate('large_blast')">Large Blast (5")</button>
+                    <button class="template-button" onclick="addTemplate('flame')">Flame Template</button>
+                    <button class="template-button" onclick="clearTemplates()">Clear Templates</button>
+                </div>
+                
+                <div style="font-size: 10px; color: #ccc; margin-top: 8px; line-height: 1.2;">
+                    💡 Click to place templates on the map. Drag to move, right-click to remove.
+                </div>
+            </div>
+            
+            <div class="formation-section">
+                <h3>📦 Movement Trays</h3>
+                
+                <div class="formation-controls">
+                    <button class="formation-button" id="createTrayBtn" onclick="toggleTrayCreation()">
+                        ➕ Create Tray
+                    </button>
+                    <button class="formation-button" onclick="clearTrays()">
+                        🗑️ Clear All Trays
+                    </button>
+                </div>
+                
+                <div class="tray-list" id="trayList">
+                    <div style="text-align: center; color: #999; font-style: italic; font-size: 10px;">
+                        No movement trays created
+                    </div>
+                </div>
+                
+                <div style="font-size: 10px; color: #ccc; margin-top: 8px; line-height: 1.2;">
+                    💡 Click "Create Tray" then drag to select tokens for formation movement
+                </div>
+            </div>
+        </div>
+        <div class="main-content">
+            <h1>🗺️ Warhammer: The Old World Simulator</h1>
+            <p>Use the interactive token map to try scenarios. Place tokens for different factions, roll dice (including artillery and scatter), place templates, and move groups. Use with AI agents (like Grok) to simulate gameplay—describe your setup and actions for AI-guided outcomes!</p>
+            
+            <div class="rules-area">
+                <div class="rules-summary">
+                    <h2>Warhammer: The Old World Rules Summary</h2>
+                    <p>Warhammer: The Old World is a fantasy miniature wargame reviving Warhammer Fantasy Battles, focusing on regiment-based combat in a medieval-inspired world.</p>
+                    <ul>
+                        <li><strong>Setup:</strong> Choose faction, build army by points, arrange units in formations (Close Order, Open Order, Skirmish, Lance), set battlefield with terrain and scenario.</li>
+                        <li><strong>Gameplay:</strong> Turns divided into Strategy (rally fleeing troops, command abilities, conjuration for enchantments/hexes), Movement (declare charges, compulsory moves, remaining moves), Shooting (ranged attacks), Combat (melee fights).</li>
+                        <li><strong>Combat:</strong> Shooting: Roll to hit (BS-based), wound (S vs T), save. Combat: Fight in initiative order, roll to hit/wound/save; resolve with break tests (2d6 vs Leadership modified by losses), potentially flee or give ground.</li>
+                        <li><strong>Magic:</strong> Integrated into phases: Enchantments/Hexes in Strategy, Conveyance in Movement, Missiles/Vortices in Shooting, Assailments in Combat. Cast with 2d6 + wizard level vs casting value; dispel similarly.</li>
+                        <li><strong>Winning:</strong> Achieve scenario objectives, score victory points from units destroyed or objectives held.</li>
+                    </ul>
+                    <p class="citation">Summaries based on official and community guides.</p>
+                </div>
+            </div>
+            
+            <div class="map-area">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div class="controls">
+                    <button onclick="addToken()">Add Token</button>
+                    <button onclick="clearTokens()">Clear All</button>
+                    <div class="info">
+                        <p>🎯 Select token type • Create movement trays • Drag formations • Right-click to remove • Use with AI for scenarios</p>
+                        <p id="tokenCount">Tokens: 0</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-
+    <div id="tooltip"></div>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
         // Game state
         let tokens = [];
+        let templates = [];
         let draggedToken = null;
+        let draggedTemplate = null;
         let dragOffset = { x: 0, y: 0 };
         let mousePos = { x: 0, y: 0 };
         let selectedTokenType = 0;
+        let movementTrays = [];
+        let selectedTray = null;
+        let draggedTray = null;
+        let isCreatingTray = false;
         
-        // Token types with emojis/symbols
-        const tokenTypes = [
-            { name: 'Hero', color: '#FF6B6B', symbol: '🗡️' },
-            { name: 'Mage', color: '#4ECDC4', symbol: '🔮' },
-            { name: 'Archer', color: '#45B7D1', symbol: '🏹' },
-            { name: 'Guard', color: '#96CEB4', symbol: '🛡️' },
-            { name: 'Rogue', color: '#FFEAA7', symbol: '🗡️' },
-            { name: 'Monster', color: '#DDA0DD', symbol: '👾' },
-            { name: 'Dragon', color: '#FFA07A', symbol: '🐉' },
-            { name: 'Treasure', color: '#98D8C8', symbol: '💎' }
-        ];
+        const factions = {
+            'Tomb Kings of Khemri': [
+                { name: 'Skeleton Warrior', color: '#F5F5DC', symbol: '☥' },
+                { name: 'Chariot', color: '#D2B48C', symbol: '🚗' },
+                { name: 'Ushabti', color: '#8B4513', symbol: '🗿' },
+                { name: 'Tomb King', color: '#FFD700', symbol: '👑' }
+            ],
+            'Orc & Goblin Tribes': [
+                { name: 'Orc Boy', color: '#006400', symbol: '👹' },
+                { name: 'Goblin', color: '#228B22', symbol: '👺' },
+                { name: 'Troll', color: '#556B2F', symbol: '🧌' },
+                { name: 'Black Orc', color: '#000000', symbol: '⚔️' }
+            ],
+            'Kingdom of Bretonnia': [
+                { name: 'Knight Errant', color: '#4169E1', symbol: '🛡️' },
+                { name: 'Peasant Bowman', color: '#A52A2A', symbol: '🏹' },
+                { name: 'Grail Knight', color: '#FFD700', symbol: '🍷' },
+                { name: 'Pegasus Knight', color: '#87CEEB', symbol: '🦄' }
+            ],
+            'Empire of Man': [
+                { name: 'State Troop', color: '#FF0000', symbol: '🗡️' },
+                { name: 'Handgunner', color: '#8B0000', symbol: '🔫' },
+                { name: 'Greatsword', color: '#C0C0C0', symbol: '⚔️' },
+                { name: 'Steam Tank', color: '#808080', symbol: '🚂' }
+            ],
+            'Dwarfen Mountain Holds': [
+                { name: 'Dwarf Warrior', color: '#A52A2A', symbol: '🪓' },
+                { name: 'Thunderer', color: '#B22222', symbol: '🔫' },
+                { name: 'Hammerer', color: '#CD853F', symbol: '🔨' },
+                { name: 'Gyrocopter', color: '#D2691E', symbol: '🚁' }
+            ],
+            'High Elf Realms': [
+                { name: 'Spearman', color: '#00BFFF', symbol: '🗡️' },
+                { name: 'Archer', color: '#1E90FF', symbol: '🏹' },
+                { name: 'Phoenix Guard', color: '#FF4500', symbol: '🔥' },
+                { name: 'Dragon Prince', color: '#FFD700', symbol: '🐉' }
+            ],
+            'Warriors of Chaos': [
+                { name: 'Chaos Warrior', color: '#4B0082', symbol: '⚔️' },
+                { name: 'Chaos Knight', color: '#9932CC', symbol: '🛡️' },
+                { name: 'Chosen', color: '#8A2BE2', symbol: '🌟' },
+                { name: 'Chaos Spawn', color: '#9400D3', symbol: '🦑' }
+            ],
+            'Beastmen Brayherds': [
+                { name: 'Gor', color: '#8B4513', symbol: '🐐' },
+                { name: 'Ungor', color: '#CD853F', symbol: '🐏' },
+                { name: 'Minotaur', color: '#A52A2A', symbol: '🦬' },
+                { name: 'Centigor', color: '#D2691E', symbol: '🏇' }
+            ],
+            'Wood Elf Realms': [
+                { name: 'Glade Guard', color: '#228B22', symbol: '🏹' },
+                { name: 'Dryad', color: '#006400', symbol: '🌳' },
+                { name: 'Wardancer', color: '#32CD32', symbol: '💃' },
+                { name: 'Treeman', color: '#556B2F', symbol: '🌲' }
+            ],
+            'Legacy Factions': [
+                { name: 'Dark Elf Warrior', color: '#301934', symbol: '🗡️' },
+                { name: 'Skaven Clanrat', color: '#A52A2A', symbol: '🐀' },
+                { name: 'Vampire Count', color: '#800000', symbol: '🧛' },
+                { name: 'Daemon', color: '#FF00FF', symbol: '👿' },
+                { name: 'Ogre', color: '#FFA500', symbol: '🧌' },
+                { name: 'Lizardman', color: '#00FF00', symbol: '🦎' },
+                { name: 'Chaos Dwarf', color: '#8B4513', symbol: '🪓' }
+            ]
+        };
+        
+        let tokenTypes = [].concat(...Object.values(factions));
+        
+        const unitStats = {
+            'Skeleton Warrior': 'M: 4\nWS: 2\nBS: 2\nS: 3\nT: 3\nW: 1\nI: 2\nA: 1\nLd: 5',
+            'Chariot': 'M: 7\nWS: 3\nBS: 3\nS: 4\nT: 4\nW: 3\nI: 3\nA: 2\nLd: 7',
+            'Ushabti': 'M: 5\nWS: 4\nBS: 3\nS: 5\nT: 5\nW: 3\nI: 3\nA: 3\nLd: 8',
+            'Tomb King': 'M: 4\nWS: 6\nBS: 3\nS: 5\nT: 5\nW: 4\nI: 4\nA: 4\nLd: 10',
+            'Orc Boy': 'M: 4\nWS: 3\nBS: 3\nS: 3\nT: 4\nW: 1\nI: 2\nA: 1\nLd: 7',
+            'Goblin': 'M: 4\nWS: 2\nBS: 3\nS: 3\nT: 3\nW: 1\nI: 3\nA: 1\nLd: 6',
+            'Troll': 'M: 6\nWS: 3\nBS: 1\nS: 5\nT: 4\nW: 3\nI: 1\nA: 3\nLd: 4',
+            'Black Orc': 'M: 4\nWS: 4\nBS: 3\nS: 4\nT: 4\nW: 1\nI: 2\nA: 1\nLd: 8',
+            'Knight Errant': 'M: 8\nWS: 3\nBS: 3\nS: 3\nT: 3\nW: 1\nI: 3\nA: 1\nLd: 7',
+            'Peasant Bowman': 'M: 4\nWS: 2\nBS: 2\nS: 3\nT: 3\nW: 1\nI: 3\nA: 1\nLd: 5',
+            'Grail Knight': 'M: 8\nWS: 5\nBS: 3\nS: 4\nT: 3\nW: 1\nI: 5\nA: 2\nLd: 8',
+            'Pegasus Knight': 'M: 8\nWS: 4\nBS: 3\nS: 3\nT: 3\nW: 1\nI: 4\nA: 1\nLd: 8',
+            'State Troop': 'M: 4\nWS: 3\nBS: 3\nS: 3\nT: 3\nW: 1\nI: 3\nA: 1\nLd: 7',
+            'Handgunner': 'M: 4\nWS: 3\nBS: 3\nS: 3\nT: 3\nW: 1\nI: 3\nA: 1\nLd: 7',
+            'Greatsword': 'M: 4\nWS: 4\nBS: 3\nS: 3\nT: 3\nW: 1\nI: 3\nA: 1\nLd: 8',
+            'Steam Tank': 'M: 6\nWS: - \nBS: 3\nS: 6\nT: 6\nW: 10\nI: - \nA: - \nLd: -',
+            'Dwarf Warrior': 'M: 3\nWS: 4\nBS: 3\nS: 3\nT: 4\nW: 1\nI: 2\nA: 1\nLd: 9',
+            'Thunderer': 'M: 3\nWS: 4\nBS: 3\nS: 3\nT: 4\nW: 1\nI: 2\nA: 1\nLd: 9',
+            'Hammerer': 'M: 3\nWS: 5\nBS: 3\nS: 4\nT: 4\nW: 1\nI: 2\nA: 1\nLd: 9',
+            'Gyrocopter': 'M: 1\nWS: 4\nBS: 4\nS: 3\nT: 4\nW: 2\nI: 2\nA: 1\nLd: 9',
+            'Spearman': 'M: 5\nWS: 4\nBS: 4\nS: 3\nT: 3\nW: 1\nI: 5\nA: 1\nLd: 8',
+            'Archer': 'M: 5\nWS: 4\nBS: 4\nS: 3\nT: 3\nW: 1\nI: 5\nA: 1\nLd: 8',
+            'Phoenix Guard': 'M: 5\nWS: 5\nBS: 4\nS: 3\nT: 3\nW: 1\nI: 6\nA: 1\nLd: 9',
+            'Dragon Prince': 'M: 5\nWS: 5\nBS: 4\nS: 3\nT: 3\nW: 1\nI: 6\nA: 1\nLd: 9',
+            'Chaos Warrior': 'M: 4\nWS: 5\nBS: 3\nS: 4\nT: 4\nW: 1\nI: 5\nA: 2\nLd: 8',
+            'Chaos Knight': 'M: 4\nWS: 5\nBS: 3\nS: 4\nT: 4\nW: 1\nI: 5\nA: 2\nLd: 8',
+            'Chosen': 'M: 4\nWS: 6\nBS: 3\nS: 4\nT: 4\nW: 1\nI: 5\nA: 3\nLd: 8',
+            'Chaos Spawn': 'M: 2D6\nWS: 3\nBS: 0\nS: 5\nT: 5\nW: 3\nI: 3\nA: D3+1\nLd: 10',
+            'Gor': 'M: 5\nWS: 4\nBS: 3\nS: 3\nT: 4\nW: 1\nI: 3\nA: 1\nLd: 7',
+            'Ungor': 'M: 5\nWS: 3\nBS: 3\nS: 3\nT: 3\nW: 1\nI: 3\nA: 1\nLd: 6',
+            'Minotaur': 'M: 6\nWS: 4\nBS: 3\nS: 5\nT: 4\nW: 3\nI: 3\nA: 3\nLd: 7',
+            'Centigor': 'M: 8\nWS: 4\nBS: 3\nS: 4\nT: 4\nW: 1\nI: 3\nA: 2\nLd: 7',
+            'Glade Guard': 'M: 5\nWS: 4\nBS: 4\nS: 3\nT: 3\nW: 1\nI: 5\nA: 1\nLd: 8',
+            'Dryad': 'M: 5\nWS: 4\nBS: 4\nS: 4\nT: 4\nW: 1\nI: 6\nA: 2\nLd: 8',
+            'Wardancer': 'M: 5\nWS: 6\nBS: 4\nS: 3\nT: 3\nW: 1\nI: 6\nA: 1\nLd: 8',
+            'Treeman': 'M: 5\nWS: 5\nBS: 3\nS: 6\nT: 6\nW: 5\nI: 2\nA: 5\nLd: 9',
+            'Dark Elf Warrior': 'M: 5\nWS: 4\nBS: 4\nS: 3\nT: 3\nW: 1\nI: 5\nA: 1\nLd: 8',
+            'Skaven Clanrat': 'M: 5\nWS: 3\nBS: 3\nS: 3\nT: 3\nW: 1\nI: 4\nA: 1\nLd: 5',
+            'Vampire Count': 'M: 6\nWS: 7\nBS: 5\nS: 5\nT: 5\nW: 3\nI: 7\nA: 5\nLd: 10',
+            'Daemon': 'M: 5\nWS: 5\nBS: 5\nS: 4\nT: 4\nW: 2\nI: 4\nA: 3\nLd: 8',
+            'Ogre': 'M: 6\nWS: 3\nBS: 2\nS: 5\nT: 4\nW: 3\nI: 2\nA: 3\nLd: 7',
+            'Lizardman': 'M: 4\nWS: 3\nBS: 3\nS: 4\nT: 4\nW: 1\nI: 2\nA: 2\nLd: 8',
+            'Chaos Dwarf': 'M: 3\nWS: 4\nBS: 3\nS: 3\nT: 4\nW: 1\nI: 2\nA: 1\nLd: 9'
+        };
+        
+        // Template class
+        class Template {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.rotation = 0; // in degrees
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.strokeStyle = '#FF0000';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                if (this.type === 'small_blast') {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 60, 0, Math.PI * 2); // 3" ~60 pixels at 20px/inch scale
+                    ctx.stroke();
+                } else if (this.type === 'large_blast') {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 100, 0, Math.PI * 2); // 5" ~100 pixels
+                    ctx.stroke();
+                } else if (this.type === 'flame') {
+                    // Teardrop shape: approximate with bezier
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(40, 80);
+                    ctx.bezierCurveTo(40, 120, 0, 160, -40, 80);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+            contains(x, y) {
+                // Simple bounding box check for dragging
+                const dx = x - this.x;
+                const dy = y - this.y;
+                const size = this.type === 'small_blast' ? 60 : this.type === 'large_blast' ? 100 : 80;
+                return Math.abs(dx) < size && Math.abs(dy) < size;
+            }
+        }
+        
+        // MovementTray class...
+        class MovementTray {
+            constructor(id) {
+                this.id = id;
+                this.tokens = [];
+                this.bounds = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+                this.name = `Formation ${id}`;
+            }
+            addToken(token) {
+                if (!this.tokens.includes(token)) {
+                    this.tokens.push(token);
+                    this.updateBounds();
+                }
+            }
+            removeToken(token) {
+                const index = this.tokens.indexOf(token);
+                if (index > -1) {
+                    this.tokens.splice(index, 1);
+                    this.updateBounds();
+                }
+            }
+            updateBounds() {
+                if (this.tokens.length === 0) return;
+                this.bounds.minX = Math.min(...this.tokens.map(t => t.x));
+                this.bounds.minY = Math.min(...this.tokens.map(t => t.y));
+                this.bounds.maxX = Math.max(...this.tokens.map(t => t.x));
+                this.bounds.maxY = Math.max(...this.tokens.map(t => t.y));
+            }
+            moveFormation(deltaX, deltaY) {
+                this.tokens.forEach(token => {
+                    token.x += deltaX;
+                    token.y += deltaY;
+                    token.x = Math.max(token.radius, Math.min(canvas.width - token.radius, token.x));
+                    token.y = Math.max(token.radius, Math.min(canvas.height - token.radius, token.y));
+                });
+                this.updateBounds();
+            }
+            draw() {
+                if (this.tokens.length === 0) return;
+                const padding = 15;
+                ctx.strokeStyle = this === selectedTray ? '#28a745' : '#666';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.strokeRect(
+                    this.bounds.minX - padding,
+                    this.bounds.minY - padding,
+                    this.bounds.maxX - this.bounds.minX + padding * 2,
+                    this.bounds.maxY - this.bounds.minY + padding * 2
+                );
+                ctx.setLineDash([]);
+                ctx.fillStyle = this === selectedTray ? '#28a745' : '#666';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(this.name, this.bounds.minX - padding, this.bounds.minY - padding - 5);
+            }
+            containsPoint(x, y) {
+                const padding = 15;
+                return x >= this.bounds.minX - padding && x <= this.bounds.maxX + padding &&
+                       y >= this.bounds.minY - padding && y <= this.bounds.maxY + padding;
+            }
+        }
         
         // Token class
         class Token {
@@ -345,15 +660,11 @@
                 this.radius = 20;
                 this.id = id;
             }
-            
             draw() {
-                // Shadow
                 ctx.shadowColor = 'rgba(0,0,0,0.3)';
                 ctx.shadowBlur = 5;
                 ctx.shadowOffsetX = 2;
                 ctx.shadowOffsetY = 2;
-                
-                // Token body
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fillStyle = this.type.color;
@@ -361,20 +672,15 @@
                 ctx.strokeStyle = '#333';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
-                // Reset shadow
                 ctx.shadowColor = 'transparent';
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 0;
-                
-                // Token symbol
                 ctx.font = '16px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(this.type.symbol, this.x, this.y);
             }
-            
             contains(x, y) {
                 const dx = x - this.x;
                 const dy = y - this.y;
@@ -382,46 +688,40 @@
             }
         }
         
-        // Draw the map background
+        // Draw map
         function drawMap() {
-            // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#d3d3d3';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw grid
             ctx.strokeStyle = '#ddd';
             ctx.lineWidth = 1;
-            
-            for (let x = 0; x <= canvas.width; x += 40) {
+            const gridSize = 40;
+            for (let x = 0; x <= canvas.width; x += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(x, 0);
                 ctx.lineTo(x, canvas.height);
                 ctx.stroke();
             }
-            
-            for (let y = 0; y <= canvas.height; y += 40) {
+            for (let y = 0; y <= canvas.height; y += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(canvas.width, y);
                 ctx.stroke();
             }
             
-            // Draw some map features (optional decorations)
             drawMapFeatures();
         }
         
         function drawMapFeatures() {
-            // Draw some simple terrain features
             ctx.fillStyle = '#90EE90';
             ctx.fillRect(100, 100, 150, 80); // Forest
             ctx.fillStyle = '#8B4513';
             ctx.fillRect(120, 120, 110, 40); // Mountain
-            
             ctx.fillStyle = '#87CEEB';
             ctx.beginPath();
-            ctx.arc(600, 300, 60, 0, Math.PI * 2); // Lake
+            ctx.arc(600, 300, 60, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Labels for features
             ctx.fillStyle = '#333';
             ctx.font = '14px Arial';
             ctx.textAlign = 'center';
@@ -429,7 +729,6 @@
             ctx.fillText('Lake', 600, 380);
         }
         
-        // Get mouse position relative to canvas
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
             return {
@@ -438,7 +737,6 @@
             };
         }
         
-        // Find token at position
         function getTokenAt(x, y) {
             for (let i = tokens.length - 1; i >= 0; i--) {
                 if (tokens[i].contains(x, y)) {
@@ -448,7 +746,15 @@
             return null;
         }
         
-        // Add a new token
+        function getTemplateAt(x, y) {
+            for (let i = templates.length - 1; i >= 0; i--) {
+                if (templates[i].contains(x, y)) {
+                    return templates[i];
+                }
+            }
+            return null;
+        }
+        
         function addToken() {
             const x = Math.random() * (canvas.width - 40) + 20;
             const y = Math.random() * (canvas.height - 40) + 20;
@@ -459,50 +765,80 @@
             render();
         }
         
-        // Create sidebar token type selector
+        function addTemplate(type) {
+            const x = canvas.width / 2;
+            const y = canvas.height / 2;
+            const template = new Template(x, y, type);
+            templates.push(template);
+            render();
+        }
+        
+        function clearTemplates() {
+            templates = [];
+            render();
+        }
+        
         function createTokenTypeSelector() {
             const container = document.getElementById('tokenTypes');
-            
-            tokenTypes.forEach((type, index) => {
-                const typeElement = document.createElement('div');
-                typeElement.className = `token-type ${index === selectedTokenType ? 'selected' : ''}`;
-                typeElement.onclick = () => selectTokenType(index);
-                
-                const preview = document.createElement('div');
-                preview.className = 'token-preview';
-                preview.style.backgroundColor = type.color;
-                preview.textContent = type.symbol;
-                
-                const label = document.createElement('div');
-                label.className = 'token-label';
-                label.textContent = type.name;
-                
-                typeElement.appendChild(preview);
-                typeElement.appendChild(label);
-                container.appendChild(typeElement);
-            });
+            container.innerHTML = '';
+            let globalIndex = 0;
+            for (const [factionName, types] of Object.entries(factions)) {
+                const details = document.createElement('details');
+                const summary = document.createElement('summary');
+                summary.textContent = factionName;
+                details.appendChild(summary);
+                types.forEach(type => {
+                    const typeElement = document.createElement('div');
+                    typeElement.className = `token-type ${globalIndex === selectedTokenType ? 'selected' : ''}`;
+                    typeElement.dataset.index = globalIndex;
+                    typeElement.dataset.unitName = type.name;
+                    typeElement.onclick = (e) => selectTokenType(parseInt(e.currentTarget.dataset.index));
+                    typeElement.onmouseenter = showTooltip;
+                    typeElement.onmouseleave = hideTooltip;
+                    const preview = document.createElement('div');
+                    preview.className = 'token-preview';
+                    preview.style.backgroundColor = type.color;
+                    preview.textContent = type.symbol;
+                    const label = document.createElement('div');
+                    label.className = 'token-label';
+                    label.textContent = type.name;
+                    typeElement.appendChild(preview);
+                    typeElement.appendChild(label);
+                    details.appendChild(typeElement);
+                    globalIndex++;
+                });
+                container.appendChild(details);
+            }
         }
         
-        // Select token type
         function selectTokenType(index) {
             selectedTokenType = index;
-            
-            // Update visual selection
-            document.querySelectorAll('.token-type').forEach((el, i) => {
-                el.classList.toggle('selected', i === index);
+            document.querySelectorAll('.token-type').forEach(el => {
+                el.classList.toggle('selected', parseInt(el.dataset.index) === index);
             });
         }
         
-        // Dice rolling functionality
+        function showTooltip(e) {
+            const tooltip = document.getElementById('tooltip');
+            const unitName = e.target.dataset.unitName;
+            const stats = unitStats[unitName] || 'No stats available';
+            tooltip.innerHTML = `<strong>${unitName}</strong><br>${stats}`;
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${e.pageX + 10}px`;
+            tooltip.style.top = `${e.pageY + 10}px`;
+        }
+        
+        function hideTooltip() {
+            document.getElementById('tooltip').style.display = 'none';
+        }
+        
+        // Dice functions...
         function rollDice() {
-            const diceTypes = ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'];
+            const diceTypes = ['d6'];
             const modifier = parseInt(document.getElementById('modifier').value) || 0;
-            
             let totalRoll = 0;
             let rollDetails = [];
             let hasRolls = false;
-            
-            // Roll each type of dice
             diceTypes.forEach(diceType => {
                 const count = parseInt(document.getElementById(diceType).value) || 0;
                 if (count > 0) {
@@ -510,31 +846,24 @@
                     const sides = parseInt(diceType.substring(1));
                     const rolls = [];
                     let subtotal = 0;
-                    
                     for (let i = 0; i < count; i++) {
                         const roll = Math.floor(Math.random() * sides) + 1;
                         rolls.push(roll);
                         subtotal += roll;
                     }
-                    
                     totalRoll += subtotal;
                     rollDetails.push(`${count}${diceType}: [${rolls.join(', ')}] = ${subtotal}`);
                 }
             });
-            
             if (!hasRolls && modifier === 0) {
                 document.getElementById('diceResults').innerHTML = 
                     '<div style="text-align: center; color: #999; font-style: italic;">Set dice quantities and roll!</div>';
                 return;
             }
-            
-            // Add modifier
             if (modifier !== 0) {
                 totalRoll += modifier;
                 rollDetails.push(`Modifier: ${modifier >= 0 ? '+' : ''}${modifier}`);
             }
-            
-            // Display results
             const resultsDiv = document.getElementById('diceResults');
             resultsDiv.innerHTML = `
                 <div class="roll-total">Total: ${totalRoll}</div>
@@ -542,127 +871,282 @@
             `;
         }
         
-        // Preset dice combinations
-        function setDicePreset(preset) {
-            // Clear all dice first
-            ['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'].forEach(dice => {
-                document.getElementById(dice).value = 0;
-            });
-            document.getElementById('modifier').value = 0;
-            
-            switch(preset) {
-                case 'attack':
-                    document.getElementById('d20').value = 1;
-                    document.getElementById('modifier').value = 5; // Common attack bonus
-                    break;
-                case 'damage':
-                    document.getElementById('d8').value = 1;
-                    document.getElementById('modifier').value = 3; // Common damage bonus
-                    break;
-                case 'stats':
-                    document.getElementById('d6').value = 4;
-                    document.getElementById('modifier').value = 0;
-                    break;
-                case 'initiative':
-                    document.getElementById('d20').value = 1;
-                    document.getElementById('modifier').value = 2; // Common dex modifier
-                    break;
-            }
+        function rollArtillery() {
+            const values = [2, 4, 6, 8, 10, 'Misfire'];
+            const result = values[Math.floor(Math.random() * 6)];
+            document.getElementById('diceResults').innerHTML = `
+                <div class="roll-total">Artillery: ${result}</div>
+            `;
         }
         
-        // Add keyboard support for dice rolling
+        function rollScatter() {
+            const values = ['Hit!', '→', '←', '↑', '↓', '↗', '↖', '↘', '↙']; // Approximate directions
+            const result = values[Math.floor(Math.random() * values.length)];
+            document.getElementById('diceResults').innerHTML = `
+                <div class="roll-total">Scatter: ${result}</div>
+            `;
+        }
+        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && e.target.classList.contains('dice-input')) {
                 rollDice();
             }
         });
         
-        // Clear all tokens
+        // Tray functions...
+        let selectionStart = null;
+        let selectionEnd = null;
+        let lastTrayPosition = null;
+        
+        function toggleTrayCreation() {
+            isCreatingTray = !isCreatingTray;
+            const btn = document.getElementById('createTrayBtn');
+            if (isCreatingTray) {
+                btn.textContent = '❌ Cancel';
+                btn.classList.add('active');
+                selectedTray = null;
+                updateTrayList();
+            } else {
+                btn.textContent = '➕ Create Tray';
+                btn.classList.remove('active');
+                selectionStart = null;
+                selectionEnd = null;
+                render();
+            }
+        }
+        
+        function createTrayFromSelection() {
+            if (!selectionStart || !selectionEnd) return;
+            const x1 = Math.min(selectionStart.x, selectionEnd.x);
+            const y1 = Math.min(selectionStart.y, selectionEnd.y);
+            const x2 = Math.max(selectionStart.x, selectionEnd.x);
+            const y2 = Math.max(selectionStart.y, selectionEnd.y);
+            const selectedTokens = tokens.filter(token => 
+                token.x >= x1 && token.x <= x2 && token.y >= y1 && token.y <= y2
+            );
+            if (selectedTokens.length > 0) {
+                const tray = new MovementTray(movementTrays.length + 1);
+                selectedTokens.forEach(token => tray.addToken(token));
+                movementTrays.push(tray);
+                updateTrayList();
+            }
+            toggleTrayCreation();
+        }
+        
+        function clearTrays() {
+            movementTrays = [];
+            selectedTray = null;
+            updateTrayList();
+            render();
+        }
+        
+        function selectTray(tray) {
+            selectedTray = selectedTray === tray ? null : tray;
+            updateTrayList();
+            render();
+        }
+        
+        function deleteTray(tray) {
+            const index = movementTrays.indexOf(tray);
+            if (index > -1) {
+                movementTrays.splice(index, 1);
+                if (selectedTray === tray) selectedTray = null;
+                updateTrayList();
+                render();
+            }
+        }
+        
+        function updateTrayList() {
+            const container = document.getElementById('trayList');
+            if (movementTrays.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999; font-style: italic; font-size: 10px;">No movement trays created</div>';
+                return;
+            }
+            container.innerHTML = '';
+            movementTrays.forEach(tray => {
+                const item = document.createElement('div');
+                item.className = `tray-item ${tray === selectedTray ? 'selected' : ''}`;
+                item.onclick = () => selectTray(tray);
+                const info = document.createElement('span');
+                info.textContent = `${tray.name} (${tray.tokens.length})`;
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'tray-delete';
+                deleteBtn.textContent = '×';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteTray(tray);
+                };
+                item.appendChild(info);
+                item.appendChild(deleteBtn);
+                container.appendChild(item);
+            });
+        }
+        
+        function getTrayAt(x, y) {
+            for (let i = movementTrays.length - 1; i >= 0; i--) {
+                if (movementTrays[i].containsPoint(x, y)) {
+                    return movementTrays[i];
+                }
+            }
+            return null;
+        }
+        
         function clearTokens() {
             tokens = [];
+            templates = [];
             draggedToken = null;
+            movementTrays = [];
+            updateTrayList();
             updateTokenCount();
             render();
         }
         
-        // Update token counter
         function updateTokenCount() {
             document.getElementById('tokenCount').textContent = `Tokens: ${tokens.length}`;
         }
         
-        // Render everything
         function render() {
             drawMap();
+            movementTrays.forEach(tray => tray.draw());
             tokens.forEach(token => token.draw());
+            templates.forEach(template => template.draw());
+            if (isCreatingTray && selectionStart && selectionEnd) {
+                ctx.strokeStyle = '#28a745';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([3, 3]);
+                const x = Math.min(selectionStart.x, selectionEnd.x);
+                const y = Math.min(selectionStart.y, selectionEnd.y);
+                const width = Math.abs(selectionEnd.x - selectionStart.x);
+                const height = Math.abs(selectionEnd.y - selectionStart.y);
+                ctx.strokeRect(x, y, width, height);
+                ctx.setLineDash([]);
+            }
         }
         
-        // Mouse event handlers
+        // Mouse events...
         canvas.addEventListener('mousedown', (e) => {
             mousePos = getMousePos(e);
+            if (isCreatingTray) {
+                selectionStart = { ...mousePos };
+                selectionEnd = { ...mousePos };
+                return;
+            }
+            const tray = getTrayAt(mousePos.x, mousePos.y);
+            if (tray && selectedTray === tray) {
+                draggedTray = tray;
+                lastTrayPosition = { ...mousePos };
+                return;
+            }
+            const template = getTemplateAt(mousePos.x, mousePos.y);
+            if (template) {
+                draggedTemplate = template;
+                dragOffset = { x: mousePos.x - template.x, y: mousePos.y - template.y };
+                canvas.style.cursor = 'grabbing';
+                return;
+            }
             const token = getTokenAt(mousePos.x, mousePos.y);
-            
             if (token) {
-                draggedToken = token;
-                dragOffset = {
-                    x: mousePos.x - token.x,
-                    y: mousePos.y - token.y
-                };
+                const tokenTray = movementTrays.find(t => t.tokens.includes(token));
+                if (tokenTray && selectedTray === tokenTray) {
+                    draggedTray = tokenTray;
+                    lastTrayPosition = { ...mousePos };
+                } else {
+                    draggedToken = token;
+                    dragOffset = { x: mousePos.x - token.x, y: mousePos.y - token.y };
+                }
                 canvas.style.cursor = 'grabbing';
             }
         });
         
         canvas.addEventListener('mousemove', (e) => {
             mousePos = getMousePos(e);
-            
-            if (draggedToken) {
-                // Update token position
+            if (isCreatingTray && selectionStart) {
+                selectionEnd = { ...mousePos };
+                render();
+                return;
+            }
+            if (draggedTray && lastTrayPosition) {
+                const deltaX = mousePos.x - lastTrayPosition.x;
+                const deltaY = mousePos.y - lastTrayPosition.y;
+                draggedTray.moveFormation(deltaX, deltaY);
+                lastTrayPosition = { ...mousePos };
+                render();
+            } else if (draggedTemplate) {
+                draggedTemplate.x = mousePos.x - dragOffset.x;
+                draggedTemplate.y = mousePos.y - dragOffset.y;
+                render();
+            } else if (draggedToken) {
                 draggedToken.x = mousePos.x - dragOffset.x;
                 draggedToken.y = mousePos.y - dragOffset.y;
-                
-                // Keep token within bounds
                 draggedToken.x = Math.max(draggedToken.radius, Math.min(canvas.width - draggedToken.radius, draggedToken.x));
                 draggedToken.y = Math.max(draggedToken.radius, Math.min(canvas.height - draggedToken.radius, draggedToken.y));
-                
+                movementTrays.forEach(tray => {
+                    if (tray.tokens.includes(draggedToken)) {
+                        tray.updateBounds();
+                    }
+                });
                 render();
             } else {
-                // Change cursor based on whether hovering over token
                 const token = getTokenAt(mousePos.x, mousePos.y);
-                canvas.style.cursor = token ? 'grab' : 'default';
+                const tray = getTrayAt(mousePos.x, mousePos.y);
+                const template = getTemplateAt(mousePos.x, mousePos.y);
+                if (isCreatingTray) {
+                    canvas.style.cursor = 'crosshair';
+                } else if (tray && selectedTray === tray) {
+                    canvas.style.cursor = 'move';
+                } else if (token || template) {
+                    canvas.style.cursor = 'grab';
+                } else {
+                    canvas.style.cursor = 'default';
+                }
             }
         });
         
         canvas.addEventListener('mouseup', () => {
+            if (isCreatingTray && selectionStart && selectionEnd) {
+                createTrayFromSelection();
+                return;
+            }
             draggedToken = null;
+            draggedTemplate = null;
+            draggedTray = null;
+            lastTrayPosition = null;
             canvas.style.cursor = 'default';
         });
         
-        // Right-click to remove token
         canvas.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             mousePos = getMousePos(e);
             const token = getTokenAt(mousePos.x, mousePos.y);
-            
             if (token) {
                 const index = tokens.indexOf(token);
                 tokens.splice(index, 1);
+                movementTrays.forEach(tray => tray.removeToken(token));
                 updateTokenCount();
+                render();
+                return;
+            }
+            const template = getTemplateAt(mousePos.x, mousePos.y);
+            if (template) {
+                const index = templates.indexOf(template);
+                templates.splice(index, 1);
                 render();
             }
         });
         
-        // Handle mouse leave
         canvas.addEventListener('mouseleave', () => {
             draggedToken = null;
+            draggedTemplate = null;
+            draggedTray = null;
+            lastTrayPosition = null;
             canvas.style.cursor = 'default';
         });
         
-        // Initialize with a few tokens
+        // Initialize
         createTokenTypeSelector();
         addToken();
         addToken();
         addToken();
-        
-        // Initial render
         render();
     </script>
 </body>
